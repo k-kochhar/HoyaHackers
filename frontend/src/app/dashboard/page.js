@@ -134,7 +134,7 @@ export default function Dashboard() {
               <div className="mb-8 border-b border-gray-200 pb-5">
                 <div className="sm:flex sm:items-center sm:justify-between">
                   <div className="sm:flex-auto">
-                    <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:leading-9">
+                    <h1 className="text-4xl font-bold leading-7 text-gray-900 sm:truncate sm:leading-9">
                       Talent Acquisition Dashboard
                     </h1>
                     <p className="mt-1 text-sm leading-6 text-gray-500">
