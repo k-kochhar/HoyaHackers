@@ -6,6 +6,7 @@ import { StarIcon } from '@heroicons/react/20/solid'
 import Image from 'next/image'
 import JobModal from './JobModal'
 import { LoadingCard } from './LoadingSkeleton'
+import ResumeModal from './ResumeModal'
 
 // Mock data for testing
 export const mockUsers = [
@@ -74,6 +75,7 @@ export const mockUsers = [
 function UserCard({ user }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [status, setStatus] = useState(user.status)
+  const [showResumeModal, setShowResumeModal] = useState(false)
 
   // Split education into major and university
   const [major, university] = user.education.split(' - ').map(s => s.trim())
@@ -281,7 +283,7 @@ function UserCard({ user }) {
             <div className="mt-6 flex items-center justify-end gap-x-4">
               <button
                 type="button"
-                onClick={() => window.open(`http://localhost:3001/api/resume/file/${user.file_name}`, '_blank')}
+                onClick={() => setShowResumeModal(true)}
                 className="inline-flex items-center gap-x-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 View Resume
@@ -297,6 +299,13 @@ function UserCard({ user }) {
           </div>
         </div>
       )}
+
+      {/* Resume Modal */}
+      <ResumeModal
+        isOpen={showResumeModal}
+        onClose={() => setShowResumeModal(false)}
+        fileName={user.file_name}
+      />
     </div>
   )
 }
