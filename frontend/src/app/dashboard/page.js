@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Menu, Transition } from '@headlessui/react'
 import {
@@ -14,6 +14,7 @@ import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import UserCardList from '@/components/UserCard'
 import SearchBar from '@/components/SearchBar'
 import Sidebar from '@/components/Sidebar'
+import Pagination from '@/components/Pagination'
 
 const userNavigation = [
   { name: 'Your profile', href: '#' },
@@ -26,6 +27,36 @@ function classNames(...classes) {
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [resumes, setResumes] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetchResumes(currentPage)
+  }, [currentPage])
+
+  const fetchResumes = async (page) => {
+    try {
+      setLoading(true)
+      const response = await fetch(`http://localhost:3001/api/resumes?page=${page}&per_page=5`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch resumes')
+      }
+      const data = await response.json()
+      setResumes(data.resumes)
+      setTotalPages(data.total_pages)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage)
+  }
 
   return (
     <>
@@ -212,7 +243,24 @@ export default function Dashboard() {
 
               {/* User Cards */}
               <div className="mt-6">
-                <UserCardList />
+                {loading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  </div>
+                ) : error ? (
+                  <div className="text-red-600 text-center py-8">{error}</div>
+                ) : (
+                  <>
+                    <UserCardList users={resumes} />
+                    <div className="mt-6">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </main>
