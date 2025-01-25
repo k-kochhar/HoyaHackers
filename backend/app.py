@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -15,7 +15,58 @@ CORS(app)  # Enable CORS for all routes
 client = MongoClient(os.getenv('MONGODB_URI'))
 db = client[os.getenv('DATABASE_NAME')]
 resumes_collection = db.data
-  # assuming your collection is named 'resumes'
+jobs_collection = db.job_information
+
+# Initialize default job if it doesn't exist
+default_job = {
+    "job_title": "Software Engineer I",
+    "job_description": """
+# Software Engineer I  
+**Location:** Atlanta, GA (Hybrid)  
+**Company:** Coca-Cola  
+
+## About the Position  
+Coca-Cola is seeking **recent CS graduates** or individuals with equivalent experience to join our **Digital Solutions** team as a **Software Engineer I**. This role focuses on **full-stack development** using **React**, **Node.js**, and **AWS**.  
+
+---
+
+## Key Responsibilities  
+- Develop and maintain scalable APIs  
+- Ensure efficient and clean code maintenance  
+- Provide production support for deployed applications  
+
+---
+
+## Required Skills  
+- Proficiency in **JavaScript/TypeScript**  
+- Experience with **React**  
+- Basic knowledge of **SQL**  
+- Familiarity with **Git**  
+
+---
+
+## What We Offer  
+- **Competitive Salary:** $75k-$95k  
+- **Comprehensive Benefits:**  
+  - 401(k) with **6% match**  
+  - 20 days **PTO**  
+  - **Unlimited beverages**  
+- Growth opportunities:  
+  - Mentorship programs  
+  - Technical training  
+  - Exposure to **global projects**  
+
+---
+
+## How to Apply  
+Submit your **resume**, **cover letter**, and **portfolio** (if available) at [careers.coca-cola.com](https://careers.coca-cola.com).  
+**Reference Code:** SWE-I-2025-ATL
+"""
+}
+
+# Check if default job exists, if not create it
+if jobs_collection.count_documents({}) == 0:
+    jobs_collection.insert_one(default_job)
 
 @app.route('/api/resumes', methods=['GET'])
 def get_resumes():
@@ -109,6 +160,52 @@ def update_resume_status(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
+@app.route('/api/resume', methods=['POST'])
+def create_resume():
+    try:
+        data = request.json
+        required_fields = ['name', 'education', 'graduation_year', 'yoe', 'gpa', 'email', 'phone']
+        
+        # Validate required fields
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Set default values for optional fields
+        data['initial_score'] = data.get('initial_score', 0)
+        data['secondary_score'] = data.get('secondary_score', 0)
+        data['status'] = data.get('status', 'new')
+        data['phone_screen'] = data.get('phone_screen', 'not completed')
+        data['notes'] = data.get('notes', '')
+        
+        # Insert the document
+        result = resumes_collection.insert_one(data)
+        
+        # Return the created document
+        created_resume = resumes_collection.find_one({'_id': result.inserted_id})
+        created_resume['_id'] = str(created_resume['_id'])
+        
+        return jsonify(created_resume), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/job', methods=['GET'])
+def get_job():
+    try:
+        job = jobs_collection.find_one()
+        if job:
+            job['_id'] = str(job['_id'])
+            return jsonify(job)
+        return jsonify({'error': 'Job not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/resume/file/<filename>', methods=['GET'])
+def get_resume_file(filename):
+    try:
+        return send_from_directory('resumes', filename)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 404
 
 @app.route('/', methods=['GET'])
 def home():
