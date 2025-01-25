@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDownIcon, ChevronUpIcon, PhoneIcon } from '@heroicons/react/20/solid'
+import { ChevronDownIcon, ChevronUpIcon, PhoneIcon, AcademicCapIcon, BriefcaseIcon, EnvelopeIcon, PhoneIcon as PhoneIconOutline } from '@heroicons/react/24/outline'
+import { StarIcon } from '@heroicons/react/20/solid'
 import Image from 'next/image'
 
 // Mock data for testing
@@ -79,31 +80,45 @@ function UserCard({ user }) {
   return (
     <div className="space-y-3">
       {/* Main Card */}
-      <div className="bg-white shadow rounded-lg hover:shadow-md transition-shadow duration-200">
+      <div className="bg-white shadow-sm rounded-xl hover:shadow-md transition-shadow duration-200 border border-gray-100">
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Image
-                className="h-12 w-12 rounded-full"
-                src={user.avatar}
-                alt=""
-                width={48}
-                height={48}
-              />
+              <div className="relative">
+                <Image
+                  className="h-16 w-16 rounded-full ring-4 ring-white"
+                  src={user.avatar}
+                  alt=""
+                  width={64}
+                  height={64}
+                />
+                <span className="absolute -bottom-1 -right-1 block h-4 w-4 rounded-full bg-green-400 ring-2 ring-white" />
+              </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{user.fullName}</h3>
-                <p className="text-sm text-gray-500">{user.currentStep}</p>
+                <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-500">
+                  <span className="font-medium text-gray-900">{user.currentStep}</span>
+                  <span className="text-gray-400">•</span>
+                  <span>{user.college}</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span
-                className={`inline-flex items-center rounded-md px-2 py-1 text-sm font-medium ring-1 ring-inset ${scoreColorClass}`}
-              >
-                Score: {user.userScore}/10
-              </span>
+              <div className="flex flex-col items-end">
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-sm font-medium ring-1 ring-inset ${scoreColorClass}`}
+                >
+                  {user.userScore}/10
+                </span>
+                <div className="mt-1 flex items-center">
+                  {[...Array(Math.floor(user.userScore / 2))].map((_, i) => (
+                    <StarIcon key={i} className="h-4 w-4 text-yellow-400" />
+                  ))}
+                </div>
+              </div>
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                className="inline-flex items-center rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 {isExpanded ? (
                   <>
@@ -124,66 +139,99 @@ function UserCard({ user }) {
 
       {/* Expanded Details */}
       {isExpanded && (
-        <div className="bg-gray-50 rounded-lg shadow-inner p-6 ml-16 space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Basic Information</h4>
-                <dl className="mt-2 space-y-2">
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-600">Username:</dt>
-                    <dd className="text-sm text-gray-900">{user.username}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-600">Graduation Year:</dt>
-                    <dd className="text-sm text-gray-900">{user.graduationYear}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-600">College:</dt>
-                    <dd className="text-sm text-gray-900">{user.college}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-600">Years of Experience:</dt>
-                    <dd className="text-sm text-gray-900">{user.yearsOfExperience}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-600">GPA:</dt>
-                    <dd className="text-sm text-gray-900">{user.gpa}</dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-500">Contact Information</h4>
-                <dl className="mt-2 space-y-2">
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-600">Email:</dt>
-                    <dd className="text-sm text-gray-900">{user.email}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-sm font-medium text-gray-600">Phone:</dt>
-                    <dd className="text-sm text-gray-900">{user.phoneNumber}</dd>
-                  </div>
-                </dl>
-              </div>
-
-              <div className="pt-4">
-                <h4 className="text-sm font-medium text-gray-500">Notes</h4>
-                <p className="mt-2 text-sm text-gray-600">{user.notes}</p>
-              </div>
-            </div>
+        <div className="relative ml-8 rounded-xl bg-white shadow-sm border border-gray-100">
+          <div className="absolute -left-4 top-8 h-8 w-8 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center">
+            <div className="h-2 w-2 rounded-full bg-gray-300" />
           </div>
+          <div className="p-6">
+            <div className="grid grid-cols-3 gap-6">
+              {/* Academic Information */}
+              <div className="col-span-1 space-y-6">
+                <div>
+                  <h4 className="flex items-center text-sm font-medium text-gray-900">
+                    <AcademicCapIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    Academic Information
+                  </h4>
+                  <dl className="mt-4 space-y-3">
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Username</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.username}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Graduation Year</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.graduationYear}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">GPA</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.gpa}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
 
-          <div className="flex justify-end pt-4">
-            <button
-              type="button"
-              className="inline-flex items-center rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              <PhoneIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
-              Schedule Phone Screen
-            </button>
+              {/* Professional Information */}
+              <div className="col-span-1 space-y-6">
+                <div>
+                  <h4 className="flex items-center text-sm font-medium text-gray-900">
+                    <BriefcaseIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    Professional Details
+                  </h4>
+                  <dl className="mt-4 space-y-3">
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Years of Experience</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.yearsOfExperience} years</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Current Step</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.currentStep}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="col-span-1 space-y-6">
+                <div>
+                  <h4 className="flex items-center text-sm font-medium text-gray-900">
+                    <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
+                    Contact Information
+                  </h4>
+                  <dl className="mt-4 space-y-3">
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Email</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.email}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Phone</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.phoneNumber}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+            {/* Notes Section */}
+            <div className="mt-6 border-t border-gray-100 pt-6">
+              <h4 className="text-sm font-medium text-gray-900">Evaluation Notes</h4>
+              <p className="mt-2 text-sm text-gray-600 leading-6">{user.notes}</p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-6 flex items-center justify-end gap-x-4">
+              <button
+                type="button"
+                className="inline-flex items-center gap-x-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                View Full Profile
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-x-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                <PhoneIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+                Schedule Phone Screen
+              </button>
+            </div>
           </div>
         </div>
       )}
