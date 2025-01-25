@@ -1,5 +1,4 @@
 from openai import OpenAI
-from dotenv import load_dotenv
 import os
 from pydantic import BaseModel
 import os
