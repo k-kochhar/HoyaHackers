@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { BriefcaseIcon, BuildingOffice2Icon, CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import JobModal from './JobModal'
+import Image from 'next/image'
+import { LoadingJob } from './LoadingSkeleton'
 
 export default function JobHeader() {
   const [showJobModal, setShowJobModal] = useState(false)
-  const [jobInfo, setJobInfo] = useState({ job_title: '', job_description: '' })
+  const [jobInfo, setJobInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchJobInfo()
@@ -13,13 +16,24 @@ export default function JobHeader() {
   const fetchJobInfo = async () => {
     try {
       const response = await fetch('http://localhost:3001/api/job')
-      if (response.ok) {
-        const data = await response.json()
-        setJobInfo(data)
+      if (!response.ok) {
+        throw new Error('Failed to fetch job information')
       }
+      const data = await response.json()
+      setJobInfo(data)
     } catch (error) {
       console.error('Error fetching job info:', error)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  if (loading) {
+    return <LoadingJob />
+  }
+
+  if (!jobInfo) {
+    return null
   }
 
   return (

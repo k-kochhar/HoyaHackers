@@ -5,6 +5,7 @@ import { ChevronDownIcon, ChevronUpIcon, PhoneIcon, AcademicCapIcon, BriefcaseIc
 import { StarIcon } from '@heroicons/react/20/solid'
 import Image from 'next/image'
 import JobModal from './JobModal'
+import { LoadingCard } from './LoadingSkeleton'
 
 // Mock data for testing
 export const mockUsers = [
@@ -72,6 +73,7 @@ export const mockUsers = [
 
 function UserCard({ user }) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [status, setStatus] = useState(user.status)
 
   // Split education into major and university
   const [major, university] = user.education.split(' - ').map(s => s.trim())
@@ -80,6 +82,37 @@ function UserCard({ user }) {
     user.initial_score >= 9 ? 'bg-green-50 text-green-700 ring-green-600/20' :
     user.initial_score >= 7 ? 'bg-blue-50 text-blue-700 ring-blue-600/20' :
     'bg-yellow-50 text-yellow-700 ring-yellow-600/20'
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/resume/${user._id}/update-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (response.ok) {
+        setStatus(newStatus)
+      }
+    } catch (error) {
+      console.error('Error updating status:', error)
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'accepted':
+        return 'text-green-700 bg-green-50 ring-green-600/20'
+      case 'rejected':
+        return 'text-red-700 bg-red-50 ring-red-600/20'
+      case 'pending':
+        return 'text-yellow-700 bg-yellow-50 ring-yellow-600/20'
+      default:
+        return 'text-gray-700 bg-gray-50 ring-gray-600/20'
+    }
+  }
 
   return (
     <div className="space-y-3">
@@ -97,7 +130,7 @@ function UserCard({ user }) {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
                 <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-500">
-                  <span className="font-medium text-gray-900">{user.status}</span>
+                  <span className={`font-medium text-gray-900 ${getStatusColor(status)}`}>{status}</span>
                   <span className="text-gray-400">•</span>
                   <span>{major}</span>
                   <span className="text-gray-400">•</span>
@@ -121,6 +154,20 @@ function UserCard({ user }) {
                     </span>
                   </div>
                 )}
+              </div>
+              <div className="flex items-center">
+                <button
+                  onClick={() => handleStatusChange('accepted')}
+                  className="rounded-l-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => handleStatusChange('rejected')}
+                  className="rounded-r-md border border-l-0 border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10"
+                >
+                  Reject
+                </button>
               </div>
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -254,9 +301,19 @@ function UserCard({ user }) {
   )
 }
 
-export default function UserCardList({ users = [] }) {
+export default function UserCardList({ users, loading }) {
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <LoadingCard key={i} />
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {users.map((user) => (
         <UserCard key={user._id} user={user} />
       ))}
