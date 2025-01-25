@@ -1,0 +1,5 @@
+name,graduation_year,education,yoe,gpa,email,phone,initial_score,notes,phone_screen,status,secondary_score
+Ritesh Reddy Thipparthi,2027,"Computer Science - University of Maryland",1,3.5,rthippar@umd.edu,240-351-6774,7.2,"Competitive programming, Algorithm design, Problem-solving skills",completed,holdfile,8
+Priyadarshan Narayansamy,2026,"Computer Science - University of Maryland",2,3.9,nspd@umd.edu,240-854-2083,9,"Machine learning projects, Data science internship, Research skills",completed,accepted,9
+FNU Mahek,2027,"Computer Science - University of Maryland",1,3.7,mahek@umd.edu,240-610-1226,7.5,"Machine learning projects, Data science internship, Research skills",not completed,holdfile,8
+Kshitij Kochhar,2026,"Computer Science - University of Maryland",2,3.7,kkochhar@umd.edu,610-563-0579,8,"Competitive programming, Algorithm design, Problem-solving skills",completed,rejected,7
