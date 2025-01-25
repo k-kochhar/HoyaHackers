@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDownIcon, ChevronUpIcon, PhoneIcon, AcademicCapIcon, BriefcaseIcon, EnvelopeIcon, PhoneIcon as PhoneIconOutline } from '@heroicons/react/24/outline'
 import { StarIcon } from '@heroicons/react/20/solid'
 import Image from 'next/image'
+import JobModal from './JobModal'
 
 // Mock data for testing
 export const mockUsers = [
@@ -72,6 +73,9 @@ export const mockUsers = [
 function UserCard({ user }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  // Split education into major and university
+  const [major, university] = user.education.split(' - ').map(s => s.trim())
+
   const scoreColorClass = 
     user.initial_score >= 9 ? 'bg-green-50 text-green-700 ring-green-600/20' :
     user.initial_score >= 7 ? 'bg-blue-50 text-blue-700 ring-blue-600/20' :
@@ -95,22 +99,28 @@ function UserCard({ user }) {
                 <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-500">
                   <span className="font-medium text-gray-900">{user.status}</span>
                   <span className="text-gray-400">•</span>
-                  <span>{user.education}</span>
+                  <span>{major}</span>
+                  <span className="text-gray-400">•</span>
+                  <span>{university}</span>
                 </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex flex-col items-end">
-                <span
-                  className={`inline-flex items-center rounded-md px-2 py-1 text-sm font-medium ring-1 ring-inset ${scoreColorClass}`}
-                >
-                  {user.initial_score}/10
-                </span>
-                <div className="mt-1 flex items-center">
-                  {[...Array(Math.floor(user.initial_score / 2))].map((_, i) => (
-                    <StarIcon key={i} className="h-4 w-4 text-yellow-400" />
-                  ))}
+              <div className="flex flex-col items-end space-y-2">
+                <div>
+                  <span className="text-xs text-gray-500 block text-right mb-1">Initial Score</span>
+                  <span className={`inline-flex items-center rounded-md px-2 py-1 text-sm font-medium ring-1 ring-inset ${scoreColorClass}`}>
+                    {user.initial_score}/10
+                  </span>
                 </div>
+                {user.secondary_score > 0 && (
+                  <div>
+                    <span className="text-xs text-gray-500 block text-right mb-1">Phone Screen Score</span>
+                    <span className="inline-flex items-center rounded-md px-2 py-1 text-sm font-medium ring-1 ring-inset bg-purple-50 text-purple-700 ring-purple-600/20">
+                      {user.secondary_score}/10
+                    </span>
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -150,8 +160,12 @@ function UserCard({ user }) {
                   </h4>
                   <dl className="mt-4 space-y-3">
                     <div>
-                      <dt className="text-xs uppercase tracking-wide text-gray-500">Education</dt>
-                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.education}</dd>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Major</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{major}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">University</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{university}</dd>
                     </div>
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-gray-500">Graduation Year</dt>
@@ -180,6 +194,10 @@ function UserCard({ user }) {
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-gray-500">Status</dt>
                       <dd className="mt-1 text-sm font-medium text-gray-900">{user.status}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Phone Screen</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.phone_screen}</dd>
                     </div>
                   </dl>
                 </div>
@@ -216,6 +234,7 @@ function UserCard({ user }) {
             <div className="mt-6 flex items-center justify-end gap-x-4">
               <button
                 type="button"
+                onClick={() => window.open(`http://localhost:3001/api/resume/file/${user.file_name}`, '_blank')}
                 className="inline-flex items-center gap-x-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 View Resume

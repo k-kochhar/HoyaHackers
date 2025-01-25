@@ -15,6 +15,7 @@ import UserCardList from '@/components/UserCard'
 import SearchBar from '@/components/SearchBar'
 import Sidebar from '@/components/Sidebar'
 import Pagination from '@/components/Pagination'
+import JobHeader from '@/components/JobHeader'
 
 const userNavigation = [
   { name: 'Your profile', href: '#' },
@@ -161,19 +162,8 @@ export default function Dashboard() {
 
           <main className="py-10">
             <div className="px-4 sm:px-6 lg:px-8">
-              {/* Header */}
-              <div className="mb-8 border-b border-gray-200 pb-5">
-                <div className="sm:flex sm:items-center sm:justify-between">
-                  <div className="sm:flex-auto">
-                    <h1 className="text-4xl font-bold leading-7 text-gray-900 sm:truncate sm:leading-9">
-                      Talent Acquisition Dashboard
-                    </h1>
-                    <p className="mt-1 text-sm leading-6 text-gray-500">
-                      Track and manage candidate applications, schedule interviews, and make hiring decisions.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              {/* Job Header */}
+              <JobHeader />
 
               {/* Stats cards */}
               <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -185,8 +175,8 @@ export default function Dashboard() {
                       </div>
                       <div className="ml-5 w-0 flex-1">
                         <dl>
-                          <dt className="truncate text-sm font-medium text-gray-500">Active Candidates</dt>
-                          <dd className="text-lg font-medium text-gray-900">24</dd>
+                          <dt className="truncate text-sm font-medium text-gray-500">Total Candidates</dt>
+                          <dd className="text-lg font-medium text-gray-900">{resumes.length}</dd>
                         </dl>
                       </div>
                     </div>
@@ -201,8 +191,10 @@ export default function Dashboard() {
                       </div>
                       <div className="ml-5 w-0 flex-1">
                         <dl>
-                          <dt className="truncate text-sm font-medium text-gray-500">Interviews This Week</dt>
-                          <dd className="text-lg font-medium text-gray-900">12</dd>
+                          <dt className="truncate text-sm font-medium text-gray-500">Phone Screens Completed</dt>
+                          <dd className="text-lg font-medium text-gray-900">
+                            {resumes.filter(r => r.phone_screen === 'completed').length}
+                          </dd>
                         </dl>
                       </div>
                     </div>
@@ -217,8 +209,10 @@ export default function Dashboard() {
                       </div>
                       <div className="ml-5 w-0 flex-1">
                         <dl>
-                          <dt className="truncate text-sm font-medium text-gray-500">Offers Extended</dt>
-                          <dd className="text-lg font-medium text-gray-900">8</dd>
+                          <dt className="truncate text-sm font-medium text-gray-500">High Potential</dt>
+                          <dd className="text-lg font-medium text-gray-900">
+                            {resumes.filter(r => r.initial_score >= 8).length}
+                          </dd>
                         </dl>
                       </div>
                     </div>
