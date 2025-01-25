@@ -16,6 +16,9 @@ import SearchBar from '@/components/SearchBar'
 import Sidebar from '@/components/Sidebar'
 import Pagination from '@/components/Pagination'
 import JobHeader from '@/components/JobHeader'
+import { LoadingStats } from '@/components/LoadingSkeleton'
+import FilterDropdown from '@/components/FilterDropdown'
+import AddCandidateModal from '@/components/AddCandidateModal'
 
 const userNavigation = [
   { name: 'Your profile', href: '#' },
@@ -32,22 +35,66 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(true)
+  const [statsLoading, setStatsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [stats, setStats] = useState({
+    total_candidates: 0,
+    completed_screens: 0,
+    high_potential: 0
+  })
+  const [filters, setFilters] = useState({
+    status: '',
+    min_score: '',
+    min_gpa: '',
+    phone_screen: ''
+  })
+  const [showAddCandidateModal, setShowAddCandidateModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [noResults, setNoResults] = useState(false)
 
   useEffect(() => {
     fetchResumes(currentPage)
-  }, [currentPage])
+    fetchStats()
+  }, [currentPage, filters, searchQuery])
+
+  const fetchStats = async () => {
+    try {
+      setStatsLoading(true)
+      const response = await fetch('http://localhost:3001/api/stats')
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data)
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+    } finally {
+      setStatsLoading(false)
+    }
+  }
 
   const fetchResumes = async (page) => {
     try {
       setLoading(true)
-      const response = await fetch(`http://localhost:3001/api/resumes?page=${page}&per_page=5`)
+      setNoResults(false)
+      
+      const queryParams = new URLSearchParams({
+        page: page,
+        per_page: 5,
+        ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '')),
+        ...(searchQuery && { search: searchQuery })
+      })
+      
+      const response = await fetch(`http://localhost:3001/api/resumes?${queryParams}`)
       if (!response.ok) {
         throw new Error('Failed to fetch resumes')
       }
       const data = await response.json()
       setResumes(data.resumes)
       setTotalPages(data.total_pages)
+      
+      if (searchQuery && data.total === 0) {
+        setNoResults(true)
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -57,6 +104,16 @@ export default function Dashboard() {
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage)
+  }
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters)
+    setCurrentPage(1)
+  }
+
+  const handleSearch = (query) => {
+    setSearchQuery(query)
+    setCurrentPage(1)
   }
 
   return (
@@ -166,68 +223,70 @@ export default function Dashboard() {
               <JobHeader />
 
               {/* Stats cards */}
-              <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="overflow-hidden rounded-lg bg-white shadow">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <UsersIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="truncate text-sm font-medium text-gray-500">Total Candidates</dt>
-                          <dd className="text-lg font-medium text-gray-900">{resumes.length}</dd>
-                        </dl>
+              {statsLoading ? (
+                <LoadingStats />
+              ) : (
+                <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="overflow-hidden rounded-lg bg-white shadow">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <UsersIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="truncate text-sm font-medium text-gray-500">Total Candidates</dt>
+                            <dd className="text-lg font-medium text-gray-900">{stats.total_candidates}</dd>
+                          </dl>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="overflow-hidden rounded-lg bg-white shadow">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <ChartPieIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="truncate text-sm font-medium text-gray-500">Phone Screens Completed</dt>
-                          <dd className="text-lg font-medium text-gray-900">
-                            {resumes.filter(r => r.phone_screen === 'completed').length}
-                          </dd>
-                        </dl>
+                  <div className="overflow-hidden rounded-lg bg-white shadow">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <ChartPieIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="truncate text-sm font-medium text-gray-500">Phone Screens Completed</dt>
+                            <dd className="text-lg font-medium text-gray-900">{stats.completed_screens}</dd>
+                          </dl>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="overflow-hidden rounded-lg bg-white shadow">
-                  <div className="p-5">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <DocumentDuplicateIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-                      </div>
-                      <div className="ml-5 w-0 flex-1">
-                        <dl>
-                          <dt className="truncate text-sm font-medium text-gray-500">High Potential</dt>
-                          <dd className="text-lg font-medium text-gray-900">
-                            {resumes.filter(r => r.initial_score >= 8).length}
-                          </dd>
-                        </dl>
+                  <div className="overflow-hidden rounded-lg bg-white shadow">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <DocumentDuplicateIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="truncate text-sm font-medium text-gray-500">High Potential</dt>
+                            <dd className="text-lg font-medium text-gray-900">{stats.high_potential}</dd>
+                          </dl>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Search and Filters Section */}
               <div className="mt-8 sm:flex sm:items-center sm:justify-between">
-                <div className="flex-1">
-                  <SearchBar />
+                <div className="flex-1 mr-4">
+                  <SearchBar onSearch={handleSearch} />
                 </div>
-                <div className="flex items-center ml-2">
+                <div className="flex items-center space-x-4">
+                  <FilterDropdown onFilterChange={handleFilterChange} />
                   <button
                     type="button"
+                    onClick={() => setShowAddCandidateModal(true)}
                     className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   >
                     Add candidate
@@ -237,22 +296,27 @@ export default function Dashboard() {
 
               {/* User Cards */}
               <div className="mt-6">
-                {loading ? (
-                  <div className="flex justify-center items-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                  </div>
-                ) : error ? (
+                {error ? (
                   <div className="text-red-600 text-center py-8">{error}</div>
+                ) : noResults ? (
+                  <div className="text-center py-8">
+                    <h3 className="mt-2 text-sm font-semibold text-gray-900">No candidates found</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Try adjusting your search or filters to find what you&apos;re looking for.
+                    </p>
+                  </div>
                 ) : (
                   <>
-                    <UserCardList users={resumes} />
-                    <div className="mt-6">
-                      <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                      />
-                    </div>
+                    <UserCardList users={resumes} loading={loading} />
+                    {!loading && (
+                      <div className="mt-6">
+                        <Pagination
+                          currentPage={currentPage}
+                          totalPages={totalPages}
+                          onPageChange={handlePageChange}
+                        />
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -260,6 +324,12 @@ export default function Dashboard() {
           </main>
         </div>
       </div>
+
+      {/* Add Candidate Modal */}
+      <AddCandidateModal
+        isOpen={showAddCandidateModal}
+        onClose={() => setShowAddCandidateModal(false)}
+      />
     </>
   )
 } 

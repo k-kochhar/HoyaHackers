@@ -77,14 +77,37 @@ def get_resumes():
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 5))
         
+        # Get search and filter parameters
+        search_query = request.args.get('search', '').strip()
+        status = request.args.get('status')
+        min_score = request.args.get('min_score')
+        min_gpa = request.args.get('min_gpa')
+        phone_screen = request.args.get('phone_screen')
+        
+        # Build filter query
+        filter_query = {}
+        
+        # Add search query if provided
+        if search_query:
+            filter_query['name'] = {'$regex': search_query, '$options': 'i'}
+            
+        if status:
+            filter_query['status'] = status
+        if min_score:
+            filter_query['initial_score'] = {'$gte': float(min_score)}
+        if min_gpa:
+            filter_query['gpa'] = {'$gte': float(min_gpa)}
+        if phone_screen:
+            filter_query['phone_screen'] = phone_screen
+        
         # Calculate skip and limit
         skip = (page - 1) * per_page
         
-        # Get total count
-        total_resumes = resumes_collection.count_documents({})
+        # Get total count with filters
+        total_resumes = resumes_collection.count_documents(filter_query)
         
-        # Get paginated resumes
-        resumes = list(resumes_collection.find().skip(skip).limit(per_page))
+        # Get filtered and paginated resumes
+        resumes = list(resumes_collection.find(filter_query).skip(skip).limit(per_page))
         
         # Convert ObjectId to string for JSON serialization
         for resume in resumes:
@@ -239,6 +262,25 @@ def prepare_call(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    try:
+        # Get total count of all resumes
+        total_candidates = resumes_collection.count_documents({})
+        
+        # Get count of completed phone screens
+        completed_screens = resumes_collection.count_documents({'phone_screen': 'completed'})
+        
+        # Get count of high potential candidates (score >= 7)
+        high_potential = resumes_collection.count_documents({'initial_score': {'$gte': 7}})
+        
+        return jsonify({
+            'total_candidates': total_candidates,
+            'completed_screens': completed_screens,
+            'high_potential': high_potential
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/', methods=['GET'])
 def home():
