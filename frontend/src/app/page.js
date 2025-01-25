@@ -14,10 +14,10 @@ import {
 import { CheckIcon } from '@heroicons/react/20/solid'
 
 const navigation = [
-  { name: 'Product', href: '#' },
+  { name: 'Home', href: '#' },
   { name: 'Features', href: '#' },
-  { name: 'Marketplace', href: '#' },
-  { name: 'Company', href: '#' },
+  { name: 'Pricing', href: '#' },
+  { name: 'Contact', href: '#' },
 ]
 const features = [
   {
@@ -163,7 +163,7 @@ export default function Example() {
             ))}
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <a href="#" className="text-sm/6 font-semibold text-gray-900">
+            <a href="/dashboard" className="text-sm/6 font-semibold text-gray-900">
               Log in <span aria-hidden="true">&rarr;</span>
             </a>
           </div>
@@ -237,11 +237,11 @@ export default function Example() {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="mx-auto max-w-2xl text-center">
                 <h1 className="text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-7xl">
-                  Deploy to the cloud with confidence
+                  Recruitment made easier with AI Screening
                 </h1>
                 <p className="mt-8 text-lg font-medium text-pretty text-gray-500 sm:text-xl/8">
-                  Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo. Elit sunt
-                  amet fugiat veniam occaecat.
+                    We make hiring faster and smarter by combining AI with personalized candidate 
+                    screenings, so you can focus on finding the perfect match.
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
                   <a
