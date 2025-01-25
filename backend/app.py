@@ -6,6 +6,8 @@ import os
 from bson import ObjectId
 import subprocess
 import json
+from werkzeug.utils import secure_filename
+from upload import process_pdf
 
 # Load environment variables
 load_dotenv()
@@ -261,6 +263,25 @@ def prepare_call(id):
         return jsonify({'message': 'Call preparation done'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/process-pdf', methods=['POST'])
+def process_pdf():
+    try:
+        pdf_file = request.files['file']
+        if not os.path.exists('temp'):
+            os.makedirs('temp')
+ 
+        temp_path = os.path.join('temp', secure_filename(pdf_file.filename))
+        result = process_pdf(temp_path)
+        os.remove(temp_path)
+        
+        return result
+        
+    except Exception as e:
+        # Clean up if error occurs
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        return str(e), 400
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
