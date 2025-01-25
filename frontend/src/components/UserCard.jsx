@@ -73,8 +73,8 @@ function UserCard({ user }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const scoreColorClass = 
-    user.userScore >= 9 ? 'bg-green-50 text-green-700 ring-green-600/20' :
-    user.userScore >= 7 ? 'bg-blue-50 text-blue-700 ring-blue-600/20' :
+    user.initial_score >= 9 ? 'bg-green-50 text-green-700 ring-green-600/20' :
+    user.initial_score >= 7 ? 'bg-blue-50 text-blue-700 ring-blue-600/20' :
     'bg-yellow-50 text-yellow-700 ring-yellow-600/20'
 
   return (
@@ -85,21 +85,17 @@ function UserCard({ user }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Image
-                  className="h-16 w-16 rounded-full ring-4 ring-white"
-                  src={user.avatar}
-                  alt=""
-                  width={64}
-                  height={64}
-                />
+                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-600">
+                  {user.name.charAt(0)}
+                </div>
                 <span className="absolute -bottom-1 -right-1 block h-4 w-4 rounded-full bg-green-400 ring-2 ring-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{user.fullName}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
                 <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-500">
-                  <span className="font-medium text-gray-900">{user.currentStep}</span>
+                  <span className="font-medium text-gray-900">{user.status}</span>
                   <span className="text-gray-400">•</span>
-                  <span>{user.college}</span>
+                  <span>{user.education}</span>
                 </div>
               </div>
             </div>
@@ -108,10 +104,10 @@ function UserCard({ user }) {
                 <span
                   className={`inline-flex items-center rounded-md px-2 py-1 text-sm font-medium ring-1 ring-inset ${scoreColorClass}`}
                 >
-                  {user.userScore}/10
+                  {user.initial_score}/10
                 </span>
                 <div className="mt-1 flex items-center">
-                  {[...Array(Math.floor(user.userScore / 2))].map((_, i) => (
+                  {[...Array(Math.floor(user.initial_score / 2))].map((_, i) => (
                     <StarIcon key={i} className="h-4 w-4 text-yellow-400" />
                   ))}
                 </div>
@@ -154,12 +150,12 @@ function UserCard({ user }) {
                   </h4>
                   <dl className="mt-4 space-y-3">
                     <div>
-                      <dt className="text-xs uppercase tracking-wide text-gray-500">Username</dt>
-                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.username}</dd>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Education</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.education}</dd>
                     </div>
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-gray-500">Graduation Year</dt>
-                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.graduationYear}</dd>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.graduation_year}</dd>
                     </div>
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-gray-500">GPA</dt>
@@ -179,11 +175,11 @@ function UserCard({ user }) {
                   <dl className="mt-4 space-y-3">
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-gray-500">Years of Experience</dt>
-                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.yearsOfExperience} years</dd>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.yoe} years</dd>
                     </div>
                     <div>
-                      <dt className="text-xs uppercase tracking-wide text-gray-500">Current Step</dt>
-                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.currentStep}</dd>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">Status</dt>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.status}</dd>
                     </div>
                   </dl>
                 </div>
@@ -203,7 +199,7 @@ function UserCard({ user }) {
                     </div>
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-gray-500">Phone</dt>
-                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.phoneNumber}</dd>
+                      <dd className="mt-1 text-sm font-medium text-gray-900">{user.phone}</dd>
                     </div>
                   </dl>
                 </div>
@@ -222,7 +218,7 @@ function UserCard({ user }) {
                 type="button"
                 className="inline-flex items-center gap-x-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
-                View Full Profile
+                View Resume
               </button>
               <button
                 type="button"
@@ -239,11 +235,11 @@ function UserCard({ user }) {
   )
 }
 
-export default function UserCardList({ users = mockUsers }) {
+export default function UserCardList({ users = [] }) {
   return (
     <div className="space-y-6">
       {users.map((user) => (
-        <UserCard key={user.id} user={user} />
+        <UserCard key={user._id} user={user} />
       ))}
     </div>
   )
