@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path='../../.env')
 
 try:
-    # MongoDB Atlas connection string (hardcoded for now)
+    # MongoDB Atlas connection string (ensure it's set in the .env file)
     connection_string = os.getenv("MONGO_URI")
 
     # Connect to the MongoDB cluster
@@ -20,43 +20,30 @@ try:
     # Create or access the 'data' collection
     collection = db['data']  # Replace 'data' with your desired collection name
 
+    # Delete all existing records in the collection
+    delete_result = collection.delete_many({})
+    print(f"Deleted {delete_result.deleted_count} existing documents.")
+
     # Read CSV file
     df = pd.read_csv('data.csv')  # Ensure 'data.csv' exists in the same directory
 
-    # Check for duplicates based on the unique field (e.g., email)
-    duplicates = df[df.duplicated(subset=['email'], keep=False)]
-    if not duplicates.empty:
-        print("Found duplicates in the following rows:")
-        print(duplicates)
-
-    # Check for missing values in the unique field (e.g., email)
-    missing_unique = df[df['email'].isnull()]
-    if not missing_unique.empty:
+    # Check for missing values in the email field
+    missing_values = df[df['email'].isnull()]
+    if not missing_values.empty:
         print("Found rows with missing unique field (email):")
-        print(missing_unique)
+        print(missing_values)
+
+    # Add a new column 'UID' with incremental values starting from 1
+    df['UID'] = range(1, len(df) + 1)
 
     # Convert the DataFrame to a list of dictionaries
     records = df.to_dict('records')
 
-    inserted_count = 0
-    skipped_count = 0
+    # Insert all records without checking for duplicates
+    collection.insert_many(records)
+    inserted_count = len(records)
 
-    for record in records:
-        # Define a unique identifier for each record (e.g., email)
-        unique_filter = {"email": record["email"]}  # Change 'email' to a unique field in your data
-        
-        # Check if the record exists in the collection
-        existing = collection.find_one(unique_filter)
-        
-        if not existing:
-            collection.insert_one(record)
-            inserted_count += 1
-        else:
-            skipped_count += 1
-            print(f"Duplicate found for email: {record['email']}")
-
-    print(f"Successfully inserted {inserted_count} new unique documents into the 'user_data' database and 'data' collection.")
-    print(f"Skipped {skipped_count} duplicate entries.")
+    print(f"Successfully inserted {inserted_count} documents into the 'user_data' database and 'data' collection.")
 
 except errors.ConnectionFailure as e:
     print(f"Failed to connect to MongoDB: {e}")
