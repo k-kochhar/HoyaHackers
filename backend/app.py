@@ -4,6 +4,8 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 from bson import ObjectId
+import subprocess
+import json
 
 # Load environment variables
 load_dotenv()
@@ -206,6 +208,37 @@ def get_resume_file(filename):
         return send_from_directory('resumes', filename)
     except Exception as e:
         return jsonify({'error': str(e)}), 404
+    
+@app.route('/api/<id>/prepare_call', methods=['PUT'])
+def prepare_call(id):
+    try:
+        uri =  os.getenv("DATABASE_URL")
+        client = MongoClient(uri)
+        print("Connected to MongoDB")
+        db = client['user_data']
+        collection = db['data']
+        result = collection.find_one()
+        result = collection.find_one({"UID": id})
+        if result:
+            if '_id' in result:
+                del result['_id']     
+            with open('candidate.json', 'w') as f:
+                json.dump(result, f, indent=4)
+        print("Downloaded candidate info...")
+        script_dir = os.path.dirname(os.path.abspath("call.py"))
+        script_name = os.path.basename("call.py")
+        apple_script = f'''
+        tell application "Terminal"
+        set newTab to do script "cd '{script_dir}' && conda activate hoya && python '{script_name}'"
+        activate
+        end tell
+        '''
+        current_process = subprocess.Popen(['osascript', '-e', apple_script])
+        current_process.communicate()
+        return jsonify({'message': 'Call preparation done'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/', methods=['GET'])
 def home():
