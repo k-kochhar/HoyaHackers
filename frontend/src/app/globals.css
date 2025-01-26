@@ -14,6 +14,11 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* Adjust based on your header height */
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
