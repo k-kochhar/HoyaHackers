@@ -1,0 +1,18 @@
+{
+    "name": "Kshitij MD",
+    "graduation_year": 2028,
+    "education": "Computer Science - Stanford University",
+    "yoe": 2,
+    "gpa": 3.89,
+    "email": "kshitih.kim@example.edu",
+    "phone": "415-555-1234",
+    "initial_score": 9,
+    "notes": "Kshitij MD demonstrates exceptional expertise in artificial intelligence and software engineering, with prestigious internships at industry leaders. At Google, he optimized cloud services achieving 30% latency reduction, while at OpenAI he improved model training efficiency by 25% through pipeline optimization. His research in reinforcement learning at Stanford's AI Lab led to publication at NeurIPS 2027, advancing multi-agent coordination systems. His project portfolio includes an AI tutoring system with 90% accuracy in learning style adaptation, a secure blockchain voting platform, and an autonomous drone delivery system. His work spans cutting-edge technologies from machine learning to distributed systems, demonstrating strong capabilities in both research and practical implementation.",
+    "phone_screen": "not completed",
+    "status": "holdfile",
+    "secondary_score": 0,
+    "location": "Kshitij_MD.pdf",
+    "file_name": "Kshitij_MD.pdf",
+    "technical_skills": "Python,Java,C++,JavaScript,Go,Rust,TensorFlow,PyTorch,Docker,Kubernetes,AWS,Git,React,Node.js,Spark,Hadoop,Flask,Solidity,Ethereum,Web3.js,ROS,Gazebo,Machine Learning,Natural Language Processing,Reinforcement Learning,Cloud Computing,Blockchain,Distributed Systems,Database Optimization,System Architecture",
+    "UID": 23
+}

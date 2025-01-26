@@ -8,6 +8,7 @@ import {
   SparklesIcon,
   XMarkIcon,
 } from '@heroicons/react/20/solid'
+import SuperSearchModal from './SuperSearchModal' 
 
 const filterOptions = [
   {
@@ -43,54 +44,48 @@ const filterOptions = [
 ]
 
 export default function SearchBar({ onSearch }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isSearching, setIsSearching] = useState(false)
+  const [query, setQuery] = useState('')
+  const [showSuperSearch, setShowSuperSearch] = useState(false)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    if (!searchQuery.trim()) return
-    
-    setIsSearching(true)
-    onSearch(searchQuery.trim())
-    setIsSearching(false)
+    onSearch(query)
   }
 
-
   return (
-    <div className="flex items-center gap-x-4">
-      {/* Search input */}
-      <div className="flex flex-1 items-center">
-        <form onSubmit={handleSubmit} className="w-full max-w-lg lg:max-w-xs">
-          <label htmlFor="search" className="sr-only">
-            Search candidates
-          </label>
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-            </div>
-            <input
-              id="search"
-              name="search"
-              className="block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              placeholder="Search candidates..."
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              disabled={isSearching}
-            />
-
+    <div className="flex gap-x-4">
+      <form onSubmit={handleSubmit} className="flex-1">
+        <label htmlFor="search" className="sr-only">
+          Search
+        </label>
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>
-        </form>
-      </div>
-
-      {/* Super Search button */}
+          <input
+            type="search"
+            name="search"
+            id="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            placeholder="Search candidates..."
+          />
+        </div>
+      </form>
       <button
         type="button"
+        onClick={() => setShowSuperSearch(true)}
         className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       >
-        <SparklesIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+        <SparklesIcon className="-ml-0.5 h-4 w-4" aria-hidden="true" />
         Super Search
       </button>
+
+      <SuperSearchModal 
+        isOpen={showSuperSearch} 
+        onClose={() => setShowSuperSearch(false)} 
+      />
     </div>
   )
 } 
