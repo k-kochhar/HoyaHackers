@@ -1,14 +1,22 @@
-import './globals.css'
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: 'HireFlow AI - Intelligent Recruiting Software',
-  description: 'Transform your hiring process with AI-powered phone screens and candidate assessment',
-}
+  title: "HireFlow",
+  description: "AI-powered hiring platform",
+  icons: {
+    icon: [
+      { url: "/HF.svg", type: "image/svg+xml" },
+    ],
+  },
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={inter.className}>{children}</body>
     </html>
-  )
+  );
 }
