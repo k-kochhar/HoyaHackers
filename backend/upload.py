@@ -25,9 +25,11 @@ def extract_pdf_text(pdf_path):
 def save_pdf(source_path, target_folder, new_name):
    os.makedirs(target_folder, exist_ok=True)
 
+   new_name = new_name.replace(" ", "_")
    if not new_name.endswith('.pdf'):
        new_name += '.pdf'
        
+
    base, ext = os.path.splitext(new_name)
    counter = 1
    target_path = os.path.join(target_folder, new_name)
@@ -40,7 +42,7 @@ def save_pdf(source_path, target_folder, new_name):
    with open(source_path, 'rb') as src, open(target_path, 'wb') as dst:
        dst.write(src.read())
    
-   return target_path
+   return new_name
 
 
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")

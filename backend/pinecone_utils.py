@@ -5,7 +5,8 @@ import pinecone
 import openai
 from dotenv import load_dotenv
 import json
-
+from PyPDF2 import PdfReader
+import re
 load_dotenv(dotenv_path='../../.env')
 
 # Initialize connections
@@ -167,9 +168,22 @@ def delete_all_entries_from_pinecone():
     except Exception as e:
         print(f"Error deleting entries from Pinecone: {str(e)}")
 
+
+def extract_pdf_text(pdf_path):
+   reader = PdfReader(pdf_path)
+   text = ""
+   for page in reader.pages:
+       text += page.extract_text()
+   text = re.sub(r'\s+', ' ', text).strip()
+   print(text)
+   return text
+
+
 def chat_person(uid, query):
     try:
         candidate_data = collection.find_one({"UID": int( uid)})
+        candidate_file= candidate_data["file_name"]
+        resume_text=extract_pdf_text(os.path.join('resumes', candidate_file))
         
         if not candidate_data:
             return {"error": "Candidate not found"}
@@ -185,8 +199,11 @@ def chat_person(uid, query):
             "role": "user",
             "content": f"""
             Here is the candidate's full profile:
-            {candidate_profile}s
+            {candidate_profile}
             
+            Here is the candidate's resume:
+            {resume_text}
+
             Now, answer the following query:
             {query}
             """

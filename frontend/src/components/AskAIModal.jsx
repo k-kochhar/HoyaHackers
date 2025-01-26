@@ -32,7 +32,9 @@ export default function AskAIModal({ isOpen, onClose, uid }) {
         throw new Error(data.error || 'Failed to get AI response')
       }
 
-      setResponse(data)
+      // Extract just the response content
+      const responseText = data.chat_response || data.response || ''
+      setResponse(responseText)
     } catch (err) {
       console.error('AI query error:', err)
       setError(err.message || 'An unexpected error occurred')
@@ -74,7 +76,7 @@ export default function AskAIModal({ isOpen, onClose, uid }) {
                   </div>
                   <div className="mt-3 text-center sm:mt-5">
                     <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
-                      Ask AI About This Candidate
+                      Ask About This Candidate
                     </Dialog.Title>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
@@ -105,22 +107,15 @@ export default function AskAIModal({ isOpen, onClose, uid }) {
                   )}
 
                   {response && (
-                    <div className="rounded-lg bg-gray-50 p-6">
-                      <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm prose-p:text-gray-600 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:my-2 prose-ul:list-disc prose-ul:pl-5 prose-li:my-0.5 prose-li:text-gray-600">
+                    <div className="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-100">
+                      <div className="prose prose-sm max-w-none">
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
                           components={{
-                            h1: ({node, ...props}) => <h1 className="text-xl font-semibold text-gray-900 mb-4" {...props} />,
-                            h2: ({node, ...props}) => <h2 className="text-lg font-semibold text-gray-900 mb-3" {...props} />,
-                            h3: ({node, ...props}) => <h3 className="text-base font-semibold text-gray-900 mb-2" {...props} />,
-                            p: ({node, ...props}) => <p className="text-gray-600 mb-4 leading-relaxed" {...props} />,
-                            ul: ({node, ...props}) => <ul className="list-disc pl-5 my-2 space-y-1" {...props} />,
-                            li: ({node, ...props}) => <li className="text-gray-600" {...props} />,
+                            p: ({node, ...props}) => <p className="text-gray-600 leading-relaxed" {...props} />,
                             strong: ({node, ...props}) => <strong className="font-semibold text-gray-900" {...props} />,
-                            code: ({node, ...props}) => <code className="px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-900 text-sm" {...props} />,
-                            blockquote: ({node, ...props}) => (
-                              <blockquote className="border-l-4 border-gray-200 pl-4 my-4 italic text-gray-600" {...props} />
-                            ),
+                            ul: ({node, ...props}) => <ul className="list-disc pl-5 space-y-1" {...props} />,
+                            li: ({node, ...props}) => <li className="text-gray-600" {...props} />
                           }}
                         >
                           {response}
@@ -135,7 +130,7 @@ export default function AskAIModal({ isOpen, onClose, uid }) {
                       disabled={isLoading || !query.trim()}
                       className="inline-flex w-full justify-center rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:from-purple-500 hover:to-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed sm:col-start-2"
                     >
-                      {isLoading ? 'Thinking...' : 'Ask AI'}
+                      {isLoading ? 'Thinking...' : 'Ask'}
                     </button>
                     <button
                       type="button"
@@ -153,4 +148,4 @@ export default function AskAIModal({ isOpen, onClose, uid }) {
       </Dialog>
     </Transition.Root>
   )
-} 
+}
