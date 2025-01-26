@@ -4,6 +4,7 @@ from langchain_community.embeddings import OpenAIEmbeddings
 import pinecone
 import openai
 from dotenv import load_dotenv
+import json
 
 load_dotenv(dotenv_path='../../.env')
 
@@ -41,6 +42,7 @@ def generate_candidate_justification(metadata, query):
                     Education: {metadata.get('education', 'N/A')}
                     Skills: {metadata.get('skills', 'N/A')}
                     Experience: {metadata.get('experience_years', 0)} years
+                    Notes: {metadata.get('full_text', 'N/A')}
                     
                     Search Query: {query}
                     
@@ -65,7 +67,6 @@ def create_searchable_text(resume_entry):
         str(resume_entry.get('yoe', ''))
     ]
     return ' '.join(filter(bool, search_fields))
-
 
 # UPSERTING ROUTE
 def upsert_resume_vectors():
@@ -97,55 +98,10 @@ def upsert_resume_vectors():
     
     print(f"Upserted {len(vectors_to_upsert)} resume vectors")
 
-
-def generate_search_embedding(job_text, query):
+def advanced_resume_search(query, top_k=5):
     try:
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Distill job description and search query into a precise, semantically rich one-liner for candidate search."
-                },
-                {
-                    "role": "user", 
-                    "content": f"""
-                    Job Description: {job_text}
-                    Search Query: {query}
-                    
-                    Generate a concise, high-signal search phrase that captures:
-                    - Core job requirements
-                    - Specific search intent
-                    - Key technical skills needed
-                    - Include main point from the search query
-                    
-                    Aim for maximum semantic information in minimal text.
-                    """
-                }
-            ],
-            max_tokens=50
-        )
-        
-        embedding_query = response.choices[0].message.content.strip()
-        return embedding_query
-    
-    except Exception as e:
-        print(f"Error generating search embedding: {e}")
-        return f"{job_text} {query}"
-
-def advanced_resume_search(query, top_k=5, job_file_path="job.txt"):
-    try:
-        # Read job description
-        with open(job_file_path, 'r') as file:
-            job_text = file.read()
-        
-        # Generate optimized embedding query
-        embedding_query = generate_search_embedding(job_text, query)
-        
         # Generate embedding
-        query_embedding = embeddings.embed_query(embedding_query)
+        query_embedding = embeddings.embed_query(query)
         
         # Pinecone search
         results = index.query(
@@ -164,25 +120,20 @@ def advanced_resume_search(query, top_k=5, job_file_path="job.txt"):
             metadata = match.get('metadata', {})
             if match.get('score', 0) > 0.6:
                 uid = int(metadata.get('uid', 0))
-                justification = generate_candidate_justification(metadata, embedding_query)
+                justification = generate_candidate_justification(metadata, query)
                 
                 detailed_matches.append({
                     "uid": uid,
-                    "name": metadata.get('name', ''),
-                    "relevance_score": match.get('score', 0),
                     "justification": justification
                 })
 
-        print(embedding_query)
-
         for match in detailed_matches:
-            print(f"UID: {match['uid']}, Name: {match['name']}, Score: {match['relevance_score']}")
+            print(json.dumps(match, indent=2))
         
         return {"candidates": detailed_matches}
-
     
     except Exception as e:
-        return {"error": f"Search error: {str(e)}"}
+        return {"error": f"An error occurred: {str(e)}"}
 
 # # Kshitij can honestly filter and query right outta mongo db but we can do it from here too and tweak it
 # def filter_resumes(skills=None, min_experience=None, graduation_year=None):
@@ -254,6 +205,3 @@ def chat_person(uid, query):
     
     except Exception as e:
         return {"error": f"An error occurred: {str(e)}"}
-    
-
-advanced_resume_search("ELECTRICAL ENGINEERS NEEDED", top_k=5, job_file_path="job.txt")
