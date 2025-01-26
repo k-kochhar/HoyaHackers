@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # MongoDB connection
-client = MongoClient(os.getenv('MONGODB_URI'))
+client = MongoClient(os.getenv('DATABASE_URL'))
 db = client[os.getenv('DATABASE_NAME')]
 resumes_collection = db.data
 jobs_collection = db.job_information
