@@ -75,7 +75,11 @@ def process_pdf(pdf_path):
                 'content': f"""" You are part of a HR recruiting team whose job is to extract information from resumes and give an initial score to the applicants based on just their resumes.
                 This is the description of the job that you should use to grade the applicants:
                 {job}
+
+                The Education section should be filled out in the following format: 
+                "<Major> - <University>"
                 
+                The grading scale is as follows:
                 Award 2 points for relevant work experience that directly aligns with the position's requirements, 
                 demonstrating progressive responsibility and quantifiable achievements; 
                 2 points for education and certifications that match or exceed the role's prerequisites; 
@@ -128,6 +132,7 @@ def process_pdf(pdf_path):
         "phone": applicant.phone,
         "initial_score": applicant.initial_score,
         "notes": applicant.notes,
+        "phone_screen": "not completed",
         "status": "new",
         "secondary_score": 0,
         "location": pdf_name,

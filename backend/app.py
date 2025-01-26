@@ -8,7 +8,7 @@ import subprocess
 import json
 from werkzeug.utils import secure_filename
 from upload import process_pdf
-
+from pinecone_utils import chat_person, advanced_resume_search
 # Load environment variables
 load_dotenv()
 
@@ -234,7 +234,7 @@ def get_resume_file(filename):
     except Exception as e:
         return jsonify({'error': str(e)}), 404
     
-@app.route('/api/<id>/prepare_call', methods=['PUT'])
+@app.route('/api/<int:id>/prepare_call', methods=['PUT'])
 def prepare_call(id):
     try:
         uri =  os.getenv("DATABASE_URL")
@@ -264,22 +264,25 @@ def prepare_call(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@app.route('/process-pdf', methods=['POST'])
-def process_pdf():
+@app.route('/process-resume', methods=['POST'])
+def process_resume():
+    temp_path = None
     try:
         pdf_file = request.files['file']
         if not os.path.exists('temp'):
             os.makedirs('temp')
  
         temp_path = os.path.join('temp', secure_filename(pdf_file.filename))
-        result = process_pdf(temp_path)
-        os.remove(temp_path)
+        pdf_file.save(temp_path)  # Save the file first
         
-        return result
+        result = process_pdf(temp_path)
+        os.remove(temp_path)  # Clean up after processing
+        
+        return str(result)  # Convert boolean to string for response
         
     except Exception as e:
         # Clean up if error occurs
-        if os.path.exists(temp_path):
+        if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
         return str(e), 400
 
@@ -302,10 +305,69 @@ def get_stats():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/search-person/<uid>', methods=['POST'])
+def process_query(uid):
+   try:
+       query = request.json['query']
+       result = chat_person(uid, query)
+       return jsonify(result)
+   except Exception as e:
+       return jsonify({"error": str(e)}), 400
+   
+
+@app.route('/special-search', methods=['POST'])
+def process_special():
+    try:
+        query = request.json['query']
+        search_result = advanced_resume_search(query)
+        
+        # Check for error in search result
+        if 'error' in search_result:
+            return jsonify({"error": search_result['error']}), 400
+        
+        applicants = {}
+        
+        # Use 'candidates' instead of expecting a direct list of matches
+        for match in search_result.get('candidates', []):
+            try:
+                # Ensure we have a valid UID
+                uid = match.get('uid')
+                if not uid:
+                    print(f"Skipping match with no UID: {match}")
+                    continue
+                
+                # Find applicant in database
+                applicant = resumes_collection.find_one({"UID": int(uid)})
+                if applicant:
+                    # Remove _id for JSON serialization
+                    applicant = {k:v for k,v in applicant.items() if k != '_id'}
+                    
+                    # Add justification and other match-specific details
+                    applicant['justification'] = match.get('justification', '')
+                    applicant['relevance_score'] = match.get('relevance_score', 0)
+                    
+                    # Use string UID as key
+                    applicants[str(uid)] = applicant
+                else:
+                    print(f"No applicant found for UID: {uid}")
+            
+            except Exception as inner_e:
+                print(f"Error processing individual match: {inner_e}")
+                print(f"Problematic match: {match}")
+        
+        print("Processed applicants:", applicants)
+        return jsonify({"applicants": applicants})
+    
+    except Exception as e:
+        print(f"Overall search error: {e}")
+        return jsonify({"error": str(e)}), 400
+    
 
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({'message': 'Welcome to the Hireflow API'})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=3001)

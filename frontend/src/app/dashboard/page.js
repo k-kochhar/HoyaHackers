@@ -9,6 +9,7 @@ import {
   ChartPieIcon,
   DocumentDuplicateIcon,
   UsersIcon,
+  CommandLineIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import UserCardList from '@/components/UserCard'
@@ -19,6 +20,7 @@ import JobHeader from '@/components/JobHeader'
 import { LoadingStats } from '@/components/LoadingSkeleton'
 import FilterDropdown from '@/components/FilterDropdown'
 import AddCandidateModal from '@/components/AddCandidateModal'
+import SuperSearchModal from '@/components/SuperSearchModal'
 
 const userNavigation = [
   { name: 'Your profile', href: '#' },
@@ -51,6 +53,7 @@ export default function Dashboard() {
   const [showAddCandidateModal, setShowAddCandidateModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [noResults, setNoResults] = useState(false)
+  const [showSuperSearch, setShowSuperSearch] = useState(false)
 
   useEffect(() => {
     fetchResumes(currentPage)
@@ -116,8 +119,14 @@ export default function Dashboard() {
     setCurrentPage(1)
   }
 
+  const handleUploadSuccess = () => {
+    // Refresh the resumes list and stats
+    fetchResumes(currentPage)
+    fetchStats()
+  }
+
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <div>
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
@@ -329,7 +338,14 @@ export default function Dashboard() {
       <AddCandidateModal
         isOpen={showAddCandidateModal}
         onClose={() => setShowAddCandidateModal(false)}
+        onSuccess={handleUploadSuccess}
       />
-    </>
+
+      {/* Super Search Modal */}
+      <SuperSearchModal 
+        isOpen={showSuperSearch} 
+        onClose={() => setShowSuperSearch(false)} 
+      />
+    </div>
   )
 } 

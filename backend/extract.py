@@ -204,8 +204,10 @@ def extract_and_update():
         collection = db['data'] 
         update = {
         "$set": {
-            "phone_screen_score":  applicant.final_score,
-            "phone_screen_notes": applicant.comments
+            "secondary_score":  applicant.final_score,
+            "phone_screen_notes": applicant.comments,
+            "phone_screen": "completed",
+            
         }
         }
         print("Updating database...")

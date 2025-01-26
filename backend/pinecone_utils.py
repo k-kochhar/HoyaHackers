@@ -9,7 +9,7 @@ import json
 load_dotenv(dotenv_path='../../.env')
 
 # Initialize connections
-client = pymongo.MongoClient(os.getenv("MONGO_URI"))
+client = pymongo.MongoClient(os.getenv("DATABASE_URL"))
 db = client["user_data"]
 collection = db["data"]
 
@@ -169,7 +169,7 @@ def delete_all_entries_from_pinecone():
 
 def chat_person(uid, query):
     try:
-        candidate_data = collection.find_one({"UID": uid})
+        candidate_data = collection.find_one({"UID": int( uid)})
         
         if not candidate_data:
             return {"error": "Candidate not found"}
