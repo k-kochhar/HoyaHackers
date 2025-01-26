@@ -312,7 +312,12 @@ def process_query(uid):
    try:
        query = request.json['query']
        result = chat_person(uid, query)
-       return jsonify(result)
+       # If result is already a string, return it directly
+       # If it's an object, wrap it in a JSON response with a 'response' field
+       result=result["chat_response"]
+       if isinstance(result, str):
+           return jsonify({"response": result})
+       return jsonify({"response": str(result)})
    except Exception as e:
        return jsonify({"error": str(e)}), 400
    

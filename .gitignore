@@ -41,3 +41,7 @@ yarn-error.log*
 *.swp
 *.swo
 .DS_Store
+<<<<<<< HEAD
+=======
+.terraform/
+>>>>>>> 92db7122bae8bafe8227ad9278df9759f340fa1b
